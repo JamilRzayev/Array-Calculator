@@ -1,0 +1,7 @@
+aiogram>=3.0.0
+sqlalchemy[asyncio]
+asyncpg
+python-dotenv
+httpx
+pydantic-settings
+uvicorn
