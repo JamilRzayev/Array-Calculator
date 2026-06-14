@@ -15,6 +15,18 @@ async def test_marzban_cmd(message: types.Message):
 
     await message.answer(f"🔍 Тестирую подключение к Marzban...\nАдрес: {config.MARZBAN_ADDRESS}")
 
+    import socket
+    from urllib.parse import urlparse
+
+    try:
+        parsed_url = urlparse(config.MARZBAN_ADDRESS)
+        hostname = parsed_url.hostname
+        if hostname:
+            ip = socket.gethostbyname(hostname)
+            await message.answer(f"🌐 Хост {hostname} разрешен в IP: {ip}")
+    except Exception as e:
+        await message.answer(f"❌ Ошибка разрешения DNS: {e}")
+
     token = await marzban._get_token()
     if not token:
         await message.answer("❌ Ошибка: Не удалось получить токен. Проверьте адрес, логин/пароль и доступность сервера в логах бота.")

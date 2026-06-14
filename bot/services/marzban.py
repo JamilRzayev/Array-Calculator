@@ -56,10 +56,11 @@ class MarzbanAPI:
 
         async with httpx.AsyncClient(verify=self.verify_ssl) as client:
             try:
+                inbounds = [i.strip() for i in config.MARZBAN_VLESS_INBOUNDS.split(",") if i.strip()]
                 user_data = {
                     "username": username,
                     "proxies": {"vless": {}},
-                    "inbounds": {"vless": ["VLESS Reality"]},
+                    "inbounds": {"vless": inbounds} if inbounds else {},
                     "expire": expire,
                     "data_limit": data_limit,
                 }
