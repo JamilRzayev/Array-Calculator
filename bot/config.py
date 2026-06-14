@@ -8,6 +8,7 @@ class Settings(BaseSettings):
     MARZBAN_ADDRESS: str
     MARZBAN_USERNAME: str
     MARZBAN_PASSWORD: str
+    MARZBAN_TOKEN: str | None = None
     MARZBAN_SKIP_SSL_VERIFY: bool = False
 
     SHOP_ID: str | None = None

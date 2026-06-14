@@ -11,9 +11,13 @@ class MarzbanAPI:
         self.username = config.MARZBAN_USERNAME
         self.password = config.MARZBAN_PASSWORD
         self.verify_ssl = not config.MARZBAN_SKIP_SSL_VERIFY
-        self.token = None
+        self.token = config.MARZBAN_TOKEN
 
     async def _get_token(self):
+        if config.MARZBAN_TOKEN:
+            self.token = config.MARZBAN_TOKEN
+            return self.token
+
         async with httpx.AsyncClient(verify=self.verify_ssl) as client:
             try:
                 url = f"{self.base_url}/api/admin/token"
@@ -38,7 +42,7 @@ class MarzbanAPI:
     async def _get_headers(self):
         if not self.token:
             await self._get_token()
-        return {"Authorization": f"Bearer {self.token}"}
+        return {"Authorization": f"Bearer {self.token}"} if self.token else {}
 
     async def create_user(self, username: str, expire: int = 0, data_limit: int = 0):
         """
