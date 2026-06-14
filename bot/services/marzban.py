@@ -12,13 +12,14 @@ class MarzbanAPI:
         self.password = config.MARZBAN_PASSWORD
         self.verify_ssl = not config.MARZBAN_SKIP_SSL_VERIFY
         self.token = config.MARZBAN_TOKEN
+        self.timeout = config.MARZBAN_TIMEOUT
 
     async def _get_token(self):
         if config.MARZBAN_TOKEN:
             self.token = config.MARZBAN_TOKEN
             return self.token
 
-        async with httpx.AsyncClient(verify=self.verify_ssl) as client:
+        async with httpx.AsyncClient(verify=self.verify_ssl, timeout=self.timeout) as client:
             try:
                 url = f"{self.base_url}/api/admin/token"
                 logger.debug(f"Attempting to get Marzban token from {url}")
@@ -34,6 +35,12 @@ class MarzbanAPI:
                 return self.token
             except httpx.HTTPStatusError as e:
                 logger.error(f"HTTP error getting Marzban token: {e.response.status_code} - {e.response.text}")
+                return None
+            except httpx.ConnectTimeout:
+                logger.error(f"Timeout connecting to Marzban at {self.base_url}. Check your firewall and address.")
+                return None
+            except httpx.ConnectError:
+                logger.error(f"Connection refused/failed to Marzban at {self.base_url}. Is the address correct and server running?")
                 return None
             except Exception as e:
                 logger.error(f"Error getting Marzban token from {self.base_url}: {type(e).__name__}: {e}")
@@ -54,7 +61,7 @@ class MarzbanAPI:
              logger.error("Cannot create user: No Marzban token")
              return None
 
-        async with httpx.AsyncClient(verify=self.verify_ssl) as client:
+        async with httpx.AsyncClient(verify=self.verify_ssl, timeout=self.timeout) as client:
             try:
                 inbounds = [i.strip() for i in config.MARZBAN_VLESS_INBOUNDS.split(",") if i.strip()]
                 user_data = {
@@ -89,7 +96,7 @@ class MarzbanAPI:
         if not headers.get("Authorization") or "None" in headers["Authorization"]:
              return None
 
-        async with httpx.AsyncClient(verify=self.verify_ssl) as client:
+        async with httpx.AsyncClient(verify=self.verify_ssl, timeout=self.timeout) as client:
             try:
                 response = await client.get(
                     f"{self.base_url}/api/user/{username}",
@@ -111,7 +118,7 @@ class MarzbanAPI:
         if not headers.get("Authorization") or "None" in headers["Authorization"]:
              return None
 
-        async with httpx.AsyncClient(verify=self.verify_ssl) as client:
+        async with httpx.AsyncClient(verify=self.verify_ssl, timeout=self.timeout) as client:
             try:
                 user_data = {
                     "expire": expire,
@@ -133,7 +140,7 @@ class MarzbanAPI:
         if not headers.get("Authorization") or "None" in headers["Authorization"]:
              return None
 
-        async with httpx.AsyncClient(verify=self.verify_ssl) as client:
+        async with httpx.AsyncClient(verify=self.verify_ssl, timeout=self.timeout) as client:
             try:
                 response = await client.post(
                     f"{self.base_url}/api/user/{username}/reset",

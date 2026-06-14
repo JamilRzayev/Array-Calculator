@@ -11,6 +11,7 @@ class Settings(BaseSettings):
     MARZBAN_TOKEN: str | None = None
     MARZBAN_SKIP_SSL_VERIFY: bool = False
     MARZBAN_VLESS_INBOUNDS: str = "VLESS Reality"
+    MARZBAN_TIMEOUT: int = 15
 
     SHOP_ID: str | None = None
     SHOP_SECRET_KEY: str | None = None

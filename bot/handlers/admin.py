@@ -27,6 +27,18 @@ async def test_marzban_cmd(message: types.Message):
     except Exception as e:
         await message.answer(f"❌ Ошибка разрешения DNS: {e}")
 
+    # Проверка общей связности
+    try:
+        async with httpx.AsyncClient() as client:
+            resp = await client.get("https://google.com", timeout=5.0)
+            await message.answer(f"✅ Интернет доступен (Google: {resp.status_code})")
+    except Exception as e:
+        await message.answer(f"⚠️ Ошибка доступа в интернет: {e}. Возможно, контейнер изолирован.")
+
+    if "localhost" in config.MARZBAN_ADDRESS or "127.0.0.1" in config.MARZBAN_ADDRESS:
+        await message.answer("⚠️ Внимание: Вы используете 'localhost'. Внутри Docker это означает 'внутри контейнера'. "
+                             "Если Marzban запущен на том же ПК, используйте 'http://host.docker.internal:8000'")
+
     token = await marzban._get_token()
     if not token:
         await message.answer("❌ Ошибка: Не удалось получить токен. Проверьте адрес, логин/пароль и доступность сервера в логах бота.")
